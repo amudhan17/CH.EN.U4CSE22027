@@ -1,125 +1,81 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
-  const [stockData, setStockData] = useState([]);
-  const [minutes, setMinutes] = useState(50);
-  const [selectedStock, setSelectedStock] = useState("NVDA"); // Default stock NVDA
-  const [stockList, setStockList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [stockData, setStockData] = useState(null);
+  const [selectedStock, setSelectedStock] = useState('NVDA');
+  const [minutes, setMinutes] = useState(30);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch available stocks on mount
-  useEffect(() => {
-    fetch("http://20.244.56.144/evaluation-service/stocks")
-      .then(response => response.json())
-      .then(data => setStockList(Object.keys(data.stocks)))
-      .catch(error => console.error("Error fetching stock list:", error));
-  }, []);
-
-  // Fetch stock data based on selected stock and minutes
-  useEffect(() => {
+  const fetchStockData = () => {
     setLoading(true);
-    fetch(`http://20.244.56.144/evaluation-service/stocks/${selectedStock}?minutes=${minutes}`)
-      .then(response => response.json())
+    setError(null);
+
+    const url = `http://20.244.56.144/evaluation-service/stocks/${selectedStock}?minutes=${minutes}`;
+    console.log('Fetching data from:', url);
+
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
       .then(data => {
+        console.log('API response data:', data);
         setStockData(data);
         setLoading(false);
       })
       .catch(error => {
-        setError("Failed to fetch stock data.");
+        console.error('Error fetching stock data:', error);
+        setError('Failed to fetch stock data.');
         setLoading(false);
       });
-  }, [selectedStock, minutes]);
-
-  // Chart plotting function
-  const plotChart = () => {
-    const canvas = document.getElementById('stockChart');
-    const ctx = canvas.getContext('2d');
-    const labels = stockData.map(item => new Date(item.lastUpdatedAt).toLocaleTimeString());
-    const prices = stockData.map(item => item.price);
-
-    // Simple line chart plotting
-    const data = {
-      labels: labels,
-      datasets: [
-        {
-          label: `${selectedStock} Price`,
-          data: prices,
-          borderColor: 'blue',
-          fill: false,
-        },
-      ],
-    };
-
-    new window.Chart(ctx, {
-      type: 'line',
-      data: data,
-      options: {
-        responsive: true,
-        plugins: {
-          tooltip: {
-            mode: 'nearest',
-            intersect: false,
-          },
-        },
-        scales: {
-          x: {
-            type: 'category',
-            labels: labels,
-          },
-          y: {
-            beginAtZero: false,
-          },
-        },
-      },
-    });
   };
 
-  // Trigger chart plotting after stock data is fetched
   useEffect(() => {
-    if (stockData.length > 0) {
-      plotChart();
-    }
-  }, [stockData]);
+    fetchStockData();
+  }, [selectedStock, minutes]);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      <h1>Stock Price Aggregation</h1>
-      
-      <label>
-        Select Stock:
-        <select 
-          value={selectedStock} 
-          onChange={(e) => setSelectedStock(e.target.value)}
-        >
-          {stockList.map((stock, index) => (
-            <option key={index} value={stock}>
-              {stock}
-            </option>
-          ))}
+    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
+      <h1> Stock Price Aggregation</h1>
+
+      <div>
+        <label>Select Stock: </label>
+        <select value={selectedStock} onChange={(e) => setSelectedStock(e.target.value)}>
+          <option value="NVDA">Nvidia</option>
+          <option value="AAPL">Apple</option>
+          <option value="AMZN">Amazon</option>
+          <option value="MSFT">Microsoft</option>
+          {/* Add more stock options if needed */}
         </select>
-      </label>
-      <br />
+      </div>
 
-      <label>
-        Time Interval (minutes):
-        <input 
-          type="number" 
-          value={minutes} 
-          onChange={(e) => setMinutes(e.target.value)} 
+      <div style={{ marginTop: '10px' }}>
+        <label>Time Interval (minutes): </label>
+        <input
+          type="number"
+          value={minutes}
+          onChange={(e) => setMinutes(e.target.value)}
+          min="1"
+          style={{ width: '60px' }}
         />
-      </label>
-      <br />
+      </div>
 
-      <button onClick={() => setMinutes(minutes)}>Fetch Data</button>
+      <button onClick={fetchStockData} style={{ marginTop: '10px' }}>Fetch Data</button>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p style={{ color: 'red' }}>{error}</p>
-      ) : (
-        <div>
-          <canvas id="stockChart" width="400" height="200"></canvas>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {stockData && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Stock Prices for {selectedStock}</h3>
+          <ul>
+            {stockData.map((entry, index) => (
+              <li key={index}>
+                Price: {entry.price}, Last Updated: {new Date(entry.lastUpdatedAt).toLocaleString()}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
