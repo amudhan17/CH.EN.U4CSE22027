@@ -6,28 +6,27 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchNumbers = async () => {
+  const mockFetchNumbers = async () => {
     setLoading(true);
     setError(null);
     
-    try {
-      const url = `http://localhost:9876/numbers/${numberType}`;
-      const startTime = Date.now();
-      const res = await fetch(url);
-      const fetchDuration = Date.now() - startTime;
-      
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status} ${res.statusText}`);
+    // Simulating a delay like a real API call would take
+    setTimeout(() => {
+      try {
+        // Mocking the response from the server
+        const mockData = {
+          windowPrevState: [1, 2, 3, 5, 7],
+          windowCurrState: [1, 2, 3, 5, 7, 11], // example of a new number added
+          numbers: [1, 2, 3, 5, 7, 11],  // Simulated list of numbers
+          avg: 4.33, // The average of the above numbers
+        };
+        setResponse(mockData);
+      } catch (err) {
+        setError("Error: Failed to fetch");
+      } finally {
+        setLoading(false);
       }
-      
-      const data = await res.json();
-      setResponse(data);
-      
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    }, 1000);  // Simulated delay of 1 second
   };
 
   // Calculate the average of the current numbers in the window
@@ -70,7 +69,7 @@ const App = () => {
         </div>
 
         <button 
-          onClick={fetchNumbers}
+          onClick={mockFetchNumbers}  // Changed to mock function
           disabled={loading}
           style={{
             padding: '10px 15px',
