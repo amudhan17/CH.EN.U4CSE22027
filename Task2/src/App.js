@@ -9,16 +9,14 @@ const App = () => {
   const mockFetchNumbers = async () => {
     setLoading(true);
     setError(null);
-    
-    // Simulating a delay like a real API call would take
+
     setTimeout(() => {
       try {
-        // Mocking the response from the server
         const mockData = {
           windowPrevState: [1, 2, 3, 5, 7],
-          windowCurrState: [1, 2, 3, 5, 7, 11], // example of a new number added
-          numbers: [1, 2, 3, 5, 7, 11],  // Simulated list of numbers
-          avg: 4.33, // The average of the above numbers
+          windowCurrState: [1, 2, 3, 5, 7, 11],
+          numbers: [1, 2, 3, 5, 7, 11], 
+          avg: 4.33, 
         };
         setResponse(mockData);
       } catch (err) {
@@ -26,20 +24,19 @@ const App = () => {
       } finally {
         setLoading(false);
       }
-    }, 1000);  // Simulated delay of 1 second
+    }, 1000); 
   };
 
-  // Calculate the average of the current numbers in the window
+  
   const calculateAverage = (numbers) => {
     if (numbers.length === 0) return 0;
     const sum = numbers.reduce((acc, num) => acc + num, 0);
     return (sum / numbers.length).toFixed(2);
   };
 
-  // Ensure the window size doesn't exceed 10 numbers
   const handleWindowState = (numbers) => {
     if (numbers.length > 10) {
-      return numbers.slice(-10); // Keep only the last 10 numbers
+      return numbers.slice(-10);
     }
     return numbers;
   };
@@ -69,7 +66,7 @@ const App = () => {
         </div>
 
         <button 
-          onClick={mockFetchNumbers}  // Changed to mock function
+          onClick={mockFetchNumbers}  
           disabled={loading}
           style={{
             padding: '10px 15px',
