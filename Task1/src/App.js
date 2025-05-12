@@ -13,7 +13,6 @@ function App() {
     setError(null);
     setFetched(false);
 
-    // Simulated API response (dummy data)
     setTimeout(() => {
       const dummyData = Array.from({ length: 5 }, (_, i) => ({
         price: (700 + Math.random() * 50).toFixed(2),
